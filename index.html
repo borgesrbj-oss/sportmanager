@@ -1,0 +1,2715 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#e94560">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SportManager">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SportManager Pro</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --secondary: #16213e;
+    --accent: #0f3460;
+    --highlight: #e94560;
+    --success: #0be881;
+    --warning: #f8b739;
+    --info: #53d8fb;
+    --text: #eaeaea;
+    --text-muted: #a0a0b0;
+    --card-bg: #1e2a45;
+    --border: #2a3a5c;
+    --gradient-1: linear-gradient(135deg, #1a1a2e, #16213e);
+    --gradient-2: linear-gradient(135deg, #e94560, #c23152);
+    --gradient-3: linear-gradient(135deg, #0be881, #09b36a);
+    --shadow: 0 8px 32px rgba(0,0,0,0.4);
+    --radius: 12px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--primary);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--secondary); }
+  ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0;
+    width: 260px;
+    background: var(--secondary);
+    border-right: 1px solid var(--border);
+    z-index: 100;
+    display: flex; flex-direction: column;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar-logo {
+    padding: 24px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+  }
+
+  .logo-icon {
+    width: 42px; height: 42px;
+    background: var(--gradient-2);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+
+  .logo-text { font-size: 18px; font-weight: 700; }
+  .logo-sub { font-size: 11px; color: var(--text-muted); }
+
+  .sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+
+  .nav-section {
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--text-muted);
+    padding: 12px 8px 6px;
+  }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 2px;
+    border: 1px solid transparent;
+  }
+
+  .nav-item:hover { background: var(--accent); color: var(--text); }
+
+  .nav-item.active {
+    background: var(--highlight);
+    color: #fff;
+    border-color: rgba(255,255,255,0.1);
+    box-shadow: 0 4px 12px rgba(233,69,96,0.3);
+  }
+
+  .nav-item .icon { font-size: 18px; width: 22px; text-align: center; }
+
+  .sidebar-footer {
+    padding: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  /* ── MAIN CONTENT ── */
+  .main {
+    margin-left: 260px;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+  }
+
+  .topbar {
+    background: var(--secondary);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 50;
+  }
+
+  .page-title { font-size: 20px; font-weight: 700; }
+  .page-subtitle { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+  .topbar-actions { display: flex; align-items: center; gap: 12px; }
+
+  .badge-notif {
+    background: var(--highlight);
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .content { flex: 1; padding: 28px; }
+
+  /* ── PAGES ── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+
+  .card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .card-title { font-size: 16px; font-weight: 700; }
+  .card-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+
+  /* ── GRID ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+
+  /* ── STAT CARDS ── */
+  .stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    display: flex; align-items: center; gap: 16px;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s;
+  }
+
+  .stat-card:hover { transform: translateY(-2px); }
+
+  .stat-icon {
+    width: 52px; height: 52px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+
+  .stat-value { font-size: 28px; font-weight: 800; line-height: 1; }
+  .stat-label { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+  .stat-change { font-size: 12px; margin-top: 6px; }
+  .stat-change.up { color: var(--success); }
+  .stat-change.down { color: var(--highlight); }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px;
+    border: none; border-radius: 8px;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn:hover { transform: translateY(-1px); filter: brightness(1.1); }
+  .btn:active { transform: translateY(0); }
+
+  .btn-primary { background: var(--highlight); color: #fff; }
+  .btn-success { background: var(--success); color: #000; }
+  .btn-warning { background: var(--warning); color: #000; }
+  .btn-info { background: var(--info); color: #000; }
+  .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .btn-danger { background: #c0392b; color: #fff; }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+  .btn-lg { padding: 14px 28px; font-size: 16px; }
+
+  /* ── FORMS ── */
+  .form-group { margin-bottom: 16px; }
+  .form-row { display: grid; gap: 16px; }
+  .form-row-2 { grid-template-columns: 1fr 1fr; }
+  .form-row-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text-muted); }
+
+  input, select, textarea {
+    width: 100%;
+    background: var(--secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-size: 14px;
+    transition: border-color 0.2s;
+    font-family: inherit;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--highlight);
+    box-shadow: 0 0 0 3px rgba(233,69,96,0.15);
+  }
+
+  select option { background: var(--secondary); }
+  textarea { resize: vertical; min-height: 80px; }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; border-radius: var(--radius); }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead th {
+    background: var(--accent);
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  tbody tr:hover { background: rgba(255,255,255,0.03); }
+
+  td {
+    padding: 14px 16px;
+    font-size: 14px;
+    vertical-align: middle;
+  }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-flex; align-items: center;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .badge-green { background: rgba(11,232,129,0.15); color: var(--success); }
+  .badge-red { background: rgba(233,69,96,0.15); color: var(--highlight); }
+  .badge-yellow { background: rgba(248,183,57,0.15); color: var(--warning); }
+  .badge-blue { background: rgba(83,216,251,0.15); color: var(--info); }
+  .badge-gray { background: rgba(160,160,176,0.15); color: var(--text-muted); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--secondary);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal-header {
+    padding: 24px 24px 0;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .modal-title { font-size: 18px; font-weight: 700; }
+
+  .modal-close {
+    width: 32px; height: 32px;
+    background: var(--border);
+    border: none; border-radius: 8px;
+    color: var(--text); font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+
+  .modal-close:hover { background: var(--highlight); }
+
+  .modal-body { padding: 20px 24px; }
+  .modal-footer { padding: 0 24px 24px; display: flex; gap: 10px; justify-content: flex-end; }
+
+  /* ── AVATAR ── */
+  .avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  /* ── PROGRESS ── */
+  .progress-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 6px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+  }
+
+  /* ── TEAM CARDS ── */
+  .team-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .team-card {
+    background: var(--card-bg);
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s;
+  }
+
+  .team-card:hover { transform: translateY(-3px); }
+
+  .team-header {
+    padding: 20px;
+    text-align: center;
+    position: relative;
+  }
+
+  .team-name { font-size: 20px; font-weight: 800; margin-top: 8px; }
+  .team-count { font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 4px; }
+
+  .team-players { padding: 0 16px 16px; }
+
+  .player-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    transition: background 0.15s;
+    margin-bottom: 4px;
+  }
+
+  .player-row:hover { background: rgba(255,255,255,0.05); }
+
+  .player-info { flex: 1; }
+  .player-name { font-size: 13px; font-weight: 600; }
+  .player-pos { font-size: 11px; color: var(--text-muted); }
+
+  .player-rating {
+    font-size: 14px; font-weight: 800;
+    color: var(--warning);
+  }
+
+  /* ── FINANCIAL ── */
+  .fin-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .fin-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+  }
+
+  .fin-value { font-size: 24px; font-weight: 800; }
+  .fin-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+  /* ── DRAW ANIMATION ── */
+  .draw-ball {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 800;
+    animation: spin 0.5s linear infinite;
+    margin: 0 auto 16px;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+  }
+
+  .pulse { animation: pulse 1.5s ease-in-out infinite; }
+
+  /* ── RATING STARS ── */
+  .stars { color: var(--warning); font-size: 14px; }
+
+  /* ── NOTIFICATION ── */
+  .notification {
+    position: fixed;
+    top: 20px; right: 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    z-index: 300;
+    max-width: 320px;
+    box-shadow: var(--shadow);
+    display: flex; align-items: center; gap: 12px;
+    animation: slideIn 0.3s ease;
+    transform: translateX(0);
+  }
+
+  @keyframes slideIn {
+    from { transform: translateX(120%); }
+    to { transform: translateX(0); }
+  }
+
+  .notif-icon { font-size: 22px; }
+  .notif-title { font-size: 14px; font-weight: 700; }
+  .notif-msg { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ── SEARCH ── */
+  .search-box {
+    position: relative;
+    max-width: 280px;
+  }
+
+  .search-box input {
+    padding-left: 38px;
+    background: var(--secondary);
+  }
+
+  .search-icon {
+    position: absolute; left: 12px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted); font-size: 16px;
+  }
+
+  /* ── TABS ── */
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+
+  .tab {
+    padding: 10px 20px;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer;
+    color: var(--text-muted);
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    margin-bottom: -1px;
+  }
+
+  .tab:hover { color: var(--text); }
+
+  .tab.active {
+    color: var(--highlight);
+    border-bottom-color: var(--highlight);
+  }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ── SCORE BADGE ── */
+  .score-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.08);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px; font-weight: 600;
+  }
+
+  /* ── MOBILE ── */
+  .menu-toggle {
+    display: none;
+    background: none; border: none;
+    color: var(--text); font-size: 22px;
+    cursor: pointer;
+  }
+
+  @media (max-width: 1100px) {
+    .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .team-container { grid-template-columns: repeat(2, 1fr); }
+    .fin-summary { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .main { margin-left: 0; }
+    .menu-toggle { display: block; }
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .team-container { grid-template-columns: 1fr; }
+    .fin-summary { grid-template-columns: 1fr; }
+    .form-row-2, .form-row-3 { grid-template-columns: 1fr; }
+    .content { padding: 16px; }
+  }
+
+  /* ── CHART AREA ── */
+  .chart-bar-wrap { margin-top: 12px; }
+
+  .chart-bar-item {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .chart-bar-label { font-size: 12px; width: 100px; flex-shrink: 0; color: var(--text-muted); }
+
+  .chart-bar-track {
+    flex: 1; height: 20px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .chart-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: flex-end;
+    padding-right: 8px;
+    font-size: 11px; font-weight: 700;
+    color: #000;
+    transition: width 0.6s ease;
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+  }
+
+  .empty-state .icon { font-size: 56px; margin-bottom: 16px; }
+  .empty-state .title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .empty-state .desc { font-size: 14px; max-width: 300px; margin: 0 auto 20px; }
+
+  /* ── POSITION COLORS ── */
+  .pos-gk { background: rgba(248,183,57,0.2); color: var(--warning); }
+  .pos-def { background: rgba(83,216,251,0.2); color: var(--info); }
+  .pos-mid { background: rgba(11,232,129,0.2); color: var(--success); }
+  .pos-fwd { background: rgba(233,69,96,0.2); color: var(--highlight); }
+
+  /* ── SCORE INPUT ── */
+  .score-input-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
+
+  .score-input-row .avatar { flex-shrink: 0; }
+
+  .score-controls {
+    display: flex; align-items: center; gap: 6px;
+    margin-left: auto;
+  }
+
+  .score-btn {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .score-btn:hover { filter: brightness(1.2); transform: scale(1.05); }
+  .score-btn.add { background: var(--success); color: #000; }
+  .score-btn.sub { background: var(--highlight); color: #fff; }
+
+  .score-num {
+    min-width: 32px; text-align: center;
+    font-size: 16px; font-weight: 800;
+  }
+
+  /* ── FINANCIAL TRANSACTION ── */
+  .transaction-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  .transaction-row:hover { background: rgba(255,255,255,0.03); }
+
+  .transaction-icon {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+
+  .transaction-amount {
+    font-size: 16px; font-weight: 700;
+    margin-left: auto;
+  }
+
+  .amount-in { color: var(--success); }
+  .amount-out { color: var(--highlight); }
+
+  /* ── RANKING ── */
+  .rank-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    transition: background 0.15s;
+  }
+
+  .rank-row:hover { background: rgba(255,255,255,0.04); }
+
+  .rank-num {
+    font-size: 14px; font-weight: 800;
+    width: 24px; text-align: center;
+  }
+
+  .rank-1 { color: #ffd700; }
+  .rank-2 { color: #c0c0c0; }
+  .rank-3 { color: #cd7f32; }
+
+  .rank-info { flex: 1; }
+  .rank-name { font-size: 14px; font-weight: 700; }
+  .rank-pos { font-size: 11px; color: var(--text-muted); }
+  .rank-score { font-size: 18px; font-weight: 800; color: var(--warning); }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">⚽</div>
+    <div>
+      <div class="logo-text">SportManager</div>
+      <div class="logo-sub">Pro v1.0</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <div class="nav-item active" onclick="navigate('dashboard', this)">
+      <span class="icon">📊</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="navigate('athletes', this)">
+      <span class="icon">👤</span> Atletas
+    </div>
+
+    <div class="nav-section">Competição</div>
+    <div class="nav-item" onclick="navigate('draw', this)">
+      <span class="icon">🎲</span> Sorteio de Times
+    </div>
+    <div class="nav-item" onclick="navigate('scores', this)">
+      <span class="icon">⚽</span> Pontuação
+    </div>
+    <div class="nav-item" onclick="navigate('ranking', this)">
+      <span class="icon">🏆</span> Ranking
+    </div>
+
+    <div class="nav-section">Financeiro</div>
+    <div class="nav-item" onclick="navigate('financial', this)">
+      <span class="icon">💰</span> Finanças
+    </div>
+    <div class="nav-item" onclick="navigate('payments', this)">
+      <span class="icon">💳</span> Mensalidades
+    </div>
+
+    <div class="nav-section">Administração</div>
+    <div class="nav-item" onclick="navigate('reports', this)">
+      <span class="icon">📈</span> Relatórios
+    </div>
+    <div class="nav-item" onclick="navigate('settings', this)">
+      <span class="icon">⚙️</span> Configurações
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">SportManager Pro © 2026</div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:16px">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <div>
+        <div class="page-title" id="pageTitle">Dashboard</div>
+        <div class="page-subtitle" id="pageSubtitle">Visão geral do sistema</div>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <span class="badge-notif" id="athleteCountBadge">0 atletas</span>
+      <button class="btn btn-primary btn-sm" onclick="navigate('athletes'); openModal('modalAthletes')">+ Novo Atleta</button>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- ═══════════════════════ DASHBOARD ═══════════════════════ -->
+    <div class="page active" id="page-dashboard">
+      <div class="grid-4" style="margin-bottom:24px">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:linear-gradient(135deg,#e94560,#c23152)">👥</div>
+          <div>
+            <div class="stat-value" id="statAthletes">0</div>
+            <div class="stat-label">Atletas Cadastrados</div>
+            <div class="stat-change up" id="statAthletesChange">—</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:linear-gradient(135deg,#0be881,#09b36a)">💰</div>
+          <div>
+            <div class="stat-value" id="statBalance">R$0</div>
+            <div class="stat-label">Saldo Atual</div>
+            <div class="stat-change" id="statBalaneceChange">—</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:linear-gradient(135deg,#53d8fb,#3aa8c7)">⚽</div>
+          <div>
+            <div class="stat-value" id="statGoals">0</div>
+            <div class="stat-label">Total de Gols</div>
+            <div class="stat-change up" id="statGoalsTop">—</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:linear-gradient(135deg,#f8b739,#e09020)">🎲</div>
+          <div>
+            <div class="stat-value" id="statDraws">0</div>
+            <div class="stat-label">Sorteios Realizados</div>
+            <div class="stat-change up">Esta temporada</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">🏆 Top Artilheiros</div>
+              <div class="card-sub">Classificação por gols + assistências</div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="navigate('ranking', document.querySelector('[onclick*=ranking]'))">Ver todos</button>
+          </div>
+          <div id="dashRanking">
+            <div class="empty-state" style="padding:30px">
+              <div class="icon">⚽</div>
+              <div class="title" style="font-size:14px">Nenhum dado ainda</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">💳 Status Financeiro</div>
+              <div class="card-sub">Situação de pagamentos</div>
+            </div>
+          </div>
+          <div id="dashFinancial">
+            <div class="empty-state" style="padding:30px">
+              <div class="icon">💰</div>
+              <div class="title" style="font-size:14px">Nenhum dado ainda</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">📊 Distribuição por Posição</div>
+            <div class="card-sub">Atletas cadastrados por função</div>
+          </div>
+        </div>
+        <div class="chart-bar-wrap" id="dashPositionChart">
+          <div style="color:var(--text-muted);font-size:14px;padding:20px 0">Nenhum atleta cadastrado ainda.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════ ATLETAS ═══════════════════════ -->
+    <div class="page" id="page-athletes">
+      <div class="card">
+        <div class="card-header">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchAthletes" placeholder="Buscar atleta..." oninput="renderAthletes()">
+          </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <select id="filterPosition" onchange="renderAthletes()" style="width:auto">
+              <option value="">Todas as posições</option>
+              <option value="Goleiro">Goleiro</option>
+              <option value="Defensor">Defensor</option>
+              <option value="Meio-campo">Meio-campo</option>
+              <option value="Atacante">Atacante</option>
+            </select>
+            <button class="btn btn-primary" onclick="openModal('modalAthletes')">+ Cadastrar Atleta</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Atleta</th>
+                <th>Posição</th>
+                <th>Habilidade</th>
+                <th>Gols</th>
+                <th>Assists</th>
+                <th>Status</th>
+                <th>Mensalidade</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="athletesTable">
+              <tr><td colspan="8">
+                <div class="empty-state">
+                  <div class="icon">👤</div>
+                  <div class="title">Nenhum atleta cadastrado</div>
+                  <div class="desc">Clique em "+ Cadastrar Atleta" para começar</div>
+                  <button class="btn btn-primary" onclick="openModal('modalAthletes')">+ Cadastrar Atleta</button>
+                </div>
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════ SORTEIO ═══════════════════════ -->
+    <div class="page" id="page-draw">
+      <div class="card" style="text-align:center;padding:40px">
+        <div style="font-size:56px;margin-bottom:16px" id="drawEmoji">🎲</div>
+        <h2 style="font-size:24px;margin-bottom:8px">Sorteio de Times</h2>
+        <p style="color:var(--text-muted);margin-bottom:28px;max-width:480px;margin-left:auto;margin-right:auto">
+          O sistema irá dividir os atletas cadastrados em 3 times equilibrados, considerando posições e nível de habilidade para garantir partidas justas.
+        </p>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+          <button class="btn btn-lg btn-primary" onclick="performDraw()">🎲 Realizar Sorteio</button>
+          <button class="btn btn-lg btn-ghost" onclick="clearDraw()">🗑️ Limpar Times</button>
+        </div>
+        <div style="margin-top:20px;padding:16px;background:rgba(255,255,255,0.04);border-radius:10px;display:inline-block">
+          <span id="drawStatus" style="font-size:14px;color:var(--text-muted)">Aguardando atletas para sortear...</span>
+        </div>
+      </div>
+
+      <div id="teamsContainer" style="display:none">
+        <div class="team-container" id="teamsGrid"></div>
+        <div class="card" style="margin-top:20px">
+          <div class="card-title" style="margin-bottom:16px">⚖️ Análise de Equilíbrio</div>
+          <div id="balanceAnalysis"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════ PONTUAÇÃO ═══════════════════════ -->
+    <div class="page" id="page-scores">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">⚽ Registro de Pontuação</div>
+            <div class="card-sub">Registre gols e assistências por partida</div>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('modalMatch')">+ Nova Partida</button>
+        </div>
+
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab(this, 'tabGoals')">Gols</div>
+          <div class="tab" onclick="switchTab(this, 'tabAssists')">Assistências</div>
+          <div class="tab" onclick="switchTab(this, 'tabHistory')">Histórico</div>
+        </div>
+
+        <div class="tab-content active" id="tabGoals">
+          <div id="goalsBoard">
+            <div class="empty-state">
+              <div class="icon">⚽</div>
+              <div class="title">Nenhuma pontuação registrada</div>
+              <div class="desc">Clique em "+ Nova Partida" para registrar uma partida</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content" id="tabAssists">
+          <div id="assistsBoard">
+            <div class="empty-state">
+              <div class="icon">🎯</div>
+              <div class="title">Nenhuma assistência registrada</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content" id="tabHistory">
+          <div id="matchHistory">
+            <div class="empty-state">
+              <div class="icon">📋</div>
+              <div class="title">Nenhuma partida registrada</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════ RANKING ═══════════════════════ -->
+    <div class="page" id="page-ranking">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">⚽ Artilharia</div>
+              <div class="card-sub">Ranking por número de gols</div>
+            </div>
+          </div>
+          <div id="rankingGoals"></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">🎯 Assistências</div>
+              <div class="card-sub">Ranking por número de assistências</div>
+            </div>
+          </div>
+          <div id="rankingAssists"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">🏆 Ranking Geral (Gols + Assistências)</div>
+          </div>
+        </div>
+        <div id="rankingOverall"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════ FINANCEIRO ═══════════════════════ -->
+    <div class="page" id="page-financial">
+      <div class="fin-summary">
+        <div class="fin-card">
+          <div class="fin-value" style="color:var(--success)" id="finIncome">R$ 0,00</div>
+          <div class="fin-label">Total de Entradas</div>
+        </div>
+        <div class="fin-card">
+          <div class="fin-value" style="color:var(--highlight)" id="finExpense">R$ 0,00</div>
+          <div class="fin-label">Total de Saídas</div>
+        </div>
+        <div class="fin-card">
+          <div class="fin-value" id="finBalance">R$ 0,00</div>
+          <div class="fin-label">Saldo Atual</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">💳 Transações</div>
+          <button class="btn btn-primary" onclick="openModal('modalTransaction')">+ Nova Transação</button>
+        </div>
+        <div id="transactionsList">
+          <div class="empty-state">
+            <div class="icon">💰</div>
+            <div class="title">Nenhuma transação</div>
+            <div class="desc">Registre entradas e saídas financeiras</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════ MENSALIDADES ═══════════════════════ -->
+    <div class="page" id="page-payments">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">💳 Controle de Mensalidades</div>
+          <div style="display:flex;gap:8px">
+            <select id="monthFilter" onchange="renderPayments()" style="width:auto">
+              <option value="">Todos os meses</option>
+            </select>
+            <button class="btn btn-success btn-sm" onclick="markAllPaid()">✓ Marcar Todos Pagos</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Atleta</th>
+                <th>Mês de Referência</th>
+                <th>Valor</th>
+                <th>Vencimento</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="paymentsTable">
+              <tr><td colspan="6">
+                <div class="empty-state">
+                  <div class="icon">💳</div>
+                  <div class="title">Nenhuma mensalidade</div>
+                </div>
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════ RELATÓRIOS ═══════════════════════ -->
+    <div class="page" id="page-reports">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📊 Desempenho por Posição</div>
+          </div>
+          <div id="reportByPosition"></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">💰 Resumo Financeiro</div>
+          </div>
+          <div id="reportFinancial"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📋 Relatório Completo de Atletas</div>
+          <button class="btn btn-info btn-sm" onclick="exportReport()">📥 Exportar</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Atleta</th>
+                <th>Posição</th>
+                <th>Habilidade</th>
+                <th>Gols</th>
+                <th>Assists</th>
+                <th>Pontos</th>
+                <th>Mensalidade</th>
+                <th>Sorteios</th>
+              </tr>
+            </thead>
+            <tbody id="reportTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════ CONFIGURAÇÕES ═══════════════════════ -->
+    <div class="page" id="page-settings">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title" style="margin-bottom:20px">⚙️ Configurações do Sistema</div>
+          <div class="form-group">
+            <label>Nome do Clube/Liga</label>
+            <input type="text" id="settClubName" value="SportManager Pro" oninput="saveSettings()">
+          </div>
+          <div class="form-group">
+            <label>Valor Padrão da Mensalidade (R$)</label>
+            <input type="number" id="settMonthlyFee" value="80" min="0" oninput="saveSettings()">
+          </div>
+          <div class="form-group">
+            <label>Dia de Vencimento</label>
+            <input type="number" id="settDueDay" value="10" min="1" max="28" oninput="saveSettings()">
+          </div>
+          <div class="form-group">
+            <label>Número de Times no Sorteio</label>
+            <select id="settNumTeams" onchange="saveSettings()">
+              <option value="2">2 times</option>
+              <option value="3" selected>3 times</option>
+              <option value="4">4 times</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Temporada Atual</label>
+            <input type="text" id="settSeason" value="2026" oninput="saveSettings()">
+          </div>
+          <button class="btn btn-success" onclick="saveSettings(); notify('Salvo!', 'Configurações salvas com sucesso.', '✅')">💾 Salvar Configurações</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="margin-bottom:20px">🎨 Aparência</div>
+          <div class="form-group">
+            <label>Cor de Destaque</label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">
+              <div onclick="setAccentColor('#e94560')" style="width:36px;height:36px;border-radius:8px;background:#e94560;cursor:pointer;border:2px solid #fff"></div>
+              <div onclick="setAccentColor('#0be881')" style="width:36px;height:36px;border-radius:8px;background:#0be881;cursor:pointer"></div>
+              <div onclick="setAccentColor('#53d8fb')" style="width:36px;height:36px;border-radius:8px;background:#53d8fb;cursor:pointer"></div>
+              <div onclick="setAccentColor('#f8b739')" style="width:36px;height:36px;border-radius:8px;background:#f8b739;cursor:pointer"></div>
+              <div onclick="setAccentColor('#a855f7')" style="width:36px;height:36px;border-radius:8px;background:#a855f7;cursor:pointer"></div>
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:20px">
+            <label>Dados do Sistema</label>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <button class="btn btn-warning btn-sm" onclick="generateSampleData()">🎭 Gerar Dados de Exemplo</button>
+              <button class="btn btn-danger btn-sm" onclick="clearAllData()">🗑️ Limpar Todos os Dados</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+
+<!-- ═══════════════════════ MODALS ═══════════════════════ -->
+
+<!-- MODAL: Cadastrar Atleta -->
+<div class="modal-overlay" id="modalAthletes">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="athleteModalTitle">👤 Cadastrar Atleta</div>
+      <button class="modal-close" onclick="closeModal('modalAthletes')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="athleteId">
+      <div class="form-row form-row-2">
+        <div class="form-group">
+          <label>Nome Completo *</label>
+          <input type="text" id="athleteName" placeholder="Ex: João Silva">
+        </div>
+        <div class="form-group">
+          <label>Apelido</label>
+          <input type="text" id="athleteNick" placeholder="Ex: Joãozinho">
+        </div>
+      </div>
+      <div class="form-row form-row-3">
+        <div class="form-group">
+          <label>Posição *</label>
+          <select id="athletePosition">
+            <option value="">Selecione</option>
+            <option value="Goleiro">Goleiro</option>
+            <option value="Defensor">Defensor</option>
+            <option value="Meio-campo">Meio-campo</option>
+            <option value="Atacante">Atacante</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Nível (1-10) *</label>
+          <input type="number" id="athleteSkill" min="1" max="10" placeholder="1-10">
+        </div>
+        <div class="form-group">
+          <label>Pé Dominante</label>
+          <select id="athleteFoot">
+            <option value="Direito">Direito</option>
+            <option value="Esquerdo">Esquerdo</option>
+            <option value="Ambidestro">Ambidestro</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row form-row-2">
+        <div class="form-group">
+          <label>Telefone</label>
+          <input type="tel" id="athletePhone" placeholder="(11) 99999-9999">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="athleteEmail" placeholder="email@exemplo.com">
+        </div>
+      </div>
+      <div class="form-row form-row-2">
+        <div class="form-group">
+          <label>Mensalidade (R$)</label>
+          <input type="number" id="athleteFee" placeholder="80" min="0">
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="athleteStatus">
+            <option value="Ativo">Ativo</option>
+            <option value="Inativo">Inativo</option>
+            <option value="Suspenso">Suspenso</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Observações</label>
+        <textarea id="athleteNotes" placeholder="Informações adicionais..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalAthletes')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveAthlete()">💾 Salvar Atleta</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Nova Partida -->
+<div class="modal-overlay" id="modalMatch">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-header">
+      <div class="modal-title">⚽ Registrar Partida</div>
+      <button class="modal-close" onclick="closeModal('modalMatch')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row form-row-3">
+        <div class="form-group">
+          <label>Data da Partida</label>
+          <input type="date" id="matchDate">
+        </div>
+        <div class="form-group">
+          <label>Time A</label>
+          <input type="text" id="matchTeamA" placeholder="Time A">
+        </div>
+        <div class="form-group">
+          <label>Time B</label>
+          <input type="text" id="matchTeamB" placeholder="Time B">
+        </div>
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="display:block;margin-bottom:10px;font-weight:700">Gols por Jogador</label>
+        <div id="goalsInputList"></div>
+      </div>
+      <div>
+        <label style="display:block;margin-bottom:10px;font-weight:700">Assistências por Jogador</label>
+        <div id="assistsInputList"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalMatch')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveMatch()">💾 Salvar Partida</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Transação -->
+<div class="modal-overlay" id="modalTransaction">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">💰 Nova Transação</div>
+      <button class="modal-close" onclick="closeModal('modalTransaction')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Tipo</label>
+        <select id="transType">
+          <option value="entrada">Entrada</option>
+          <option value="saida">Saída</option>
+        </select>
+      </div>
+      <div class="form-row form-row-2">
+        <div class="form-group">
+          <label>Valor (R$)</label>
+          <input type="number" id="transValue" placeholder="0,00" min="0" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>Data</label>
+          <input type="date" id="transDate">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Descrição</label>
+        <input type="text" id="transDesc" placeholder="Ex: Mensalidades de Janeiro">
+      </div>
+      <div class="form-group">
+        <label>Categoria</label>
+        <select id="transCat">
+          <option value="Mensalidade">Mensalidade</option>
+          <option value="Taxa de Inscrição">Taxa de Inscrição</option>
+          <option value="Equipamentos">Equipamentos</option>
+          <option value="Aluguel de Quadra">Aluguel de Quadra</option>
+          <option value="Premiação">Premiação</option>
+          <option value="Patrocínio">Patrocínio</option>
+          <option value="Outros">Outros</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalTransaction')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveTransaction()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ JAVASCRIPT ═══════════════════════ -->
+<script>
+// ════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════
+let state = {
+  athletes: [],
+  transactions: [],
+  matches: [],
+  teams: [],
+  drawCount: 0,
+  settings: {
+    clubName: 'SportManager Pro',
+    monthlyFee: 80,
+    dueDay: 10,
+    numTeams: 3,
+    season: '2026'
+  }
+};
+
+const POSITION_COLORS = {
+  'Goleiro': ['#f8b739', '#000'],
+  'Defensor': ['#53d8fb', '#000'],
+  'Meio-campo': ['#0be881', '#000'],
+  'Atacante': ['#e94560', '#fff']
+};
+
+const TEAM_COLORS = [
+  { bg: '#e94560', text: '#fff', name: 'Time Vermelho', emoji: '🔴' },
+  { bg: '#0be881', text: '#000', name: 'Time Verde', emoji: '🟢' },
+  { bg: '#53d8fb', text: '#000', name: 'Time Azul', emoji: '🔵' },
+  { bg: '#f8b739', text: '#000', name: 'Time Amarelo', emoji: '🟡' }
+];
+
+// ════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════
+function init() {
+  loadData();
+  setDefaultDates();
+  populateMonthFilter();
+  updateAll();
+}
+
+function loadData() {
+  const saved = localStorage.getItem('sportmanager_data');
+  if (saved) {
+    try { state = { ...state, ...JSON.parse(saved) }; } catch(e) {}
+  }
+}
+
+function saveData() {
+  localStorage.setItem('sportmanager_data', JSON.stringify(state));
+}
+
+function setDefaultDates() {
+  const today = new Date().toISOString().split('T')[0];
+  const els = ['matchDate', 'transDate'];
+  els.forEach(id => { const el = document.getElementById(id); if(el) el.value = today; });
+}
+
+
+function populateMonthFilter() {
+  const sel = document.getElementById('monthFilter');
+  if (!sel) return;
+  const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+                  'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  months.forEach((m, i) => {
+    const opt = document.createElement('option');
+    opt.value = i + 1;
+    opt.textContent = m + ' ' + new Date().getFullYear();
+    sel.appendChild(opt);
+  });
+}
+
+function updateAll() {
+  updateBadge();
+  renderAthletes();
+  renderDashboard();
+  renderRanking();
+  renderFinancial();
+  renderPayments();
+  renderReports();
+  renderScores();
+}
+
+// ════════════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════════════
+const pageTitles = {
+  dashboard: ['Dashboard', 'Visão geral do sistema'],
+  athletes:  ['Atletas', 'Gerenciar atletas cadastrados'],
+  draw:      ['Sorteio de Times', 'Dividir atletas em equipes equilibradas'],
+  scores:    ['Pontuação', 'Registrar gols e assistências'],
+  ranking:   ['Ranking', 'Classificação dos atletas'],
+  financial: ['Financeiro', 'Controle de receitas e despesas'],
+  payments:  ['Mensalidades', 'Controle de pagamentos'],
+  reports:   ['Relatórios', 'Análise de desempenho e dados'],
+  settings:  ['Configurações', 'Personalizar o sistema']
+};
+
+function navigate(page, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const target = document.getElementById('page-' + page);
+  if (target) target.classList.add('active');
+  if (el) el.classList.add('active');
+  const titles = pageTitles[page] || [page, ''];
+  document.getElementById('pageTitle').textContent = titles[0];
+  document.getElementById('pageSubtitle').textContent = titles[1];
+  if (page === 'scores') buildMatchInputs();
+  if (page === 'reports') renderReports();
+  if (page === 'ranking') renderRanking();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// ════════════════════════════════════════════
+//  MODALS
+// ════════════════════════════════════════════
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  if (id === 'modalAthletes') resetAthleteForm();
+  if (id === 'modalMatch') buildMatchInputs();
+  if (id === 'modalTransaction') {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('transDate').value = today;
+  }
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+  });
+});
+
+// ════════════════════════════════════════════
+//  ATHLETES
+// ════════════════════════════════════════════
+function resetAthleteForm() {
+  document.getElementById('athleteId').value = '';
+  document.getElementById('athleteModalTitle').textContent = '👤 Cadastrar Atleta';
+  ['athleteName','athleteNick','athletePhone','athleteEmail','athleteNotes'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('athletePosition').value = '';
+  document.getElementById('athleteSkill').value = '';
+  document.getElementById('athleteFoot').value = 'Direito';
+  document.getElementById('athleteStatus').value = 'Ativo';
+  document.getElementById('athleteFee').value = state.settings.monthlyFee || 80;
+}
+
+function saveAthlete() {
+  const name = document.getElementById('athleteName').value.trim();
+  const position = document.getElementById('athletePosition').value;
+  const skill = parseInt(document.getElementById('athleteSkill').value);
+
+  if (!name) { notify('Atenção', 'Informe o nome do atleta.', '⚠️'); return; }
+  if (!position) { notify('Atenção', 'Selecione a posição.', '⚠️'); return; }
+  if (!skill || skill < 1 || skill > 10) { notify('Atenção', 'Nível deve ser entre 1 e 10.', '⚠️'); return; }
+
+  const editId = document.getElementById('athleteId').value;
+  const athlete = {
+    id: editId || Date.now().toString(),
+    name,
+    nick: document.getElementById('athleteNick').value.trim(),
+    position,
+    skill,
+    foot: document.getElementById('athleteFoot').value,
+    phone: document.getElementById('athletePhone').value.trim(),
+    email: document.getElementById('athleteEmail').value.trim(),
+    fee: parseFloat(document.getElementById('athleteFee').value) || state.settings.monthlyFee || 80,
+    status: document.getElementById('athleteStatus').value,
+    notes: document.getElementById('athleteNotes').value.trim(),
+    goals: 0,
+    assists: 0,
+    createdAt: editId ? undefined : new Date().toISOString()
+  };
+
+  if (editId) {
+    const idx = state.athletes.findIndex(a => a.id === editId);
+    if (idx !== -1) {
+      athlete.goals = state.athletes[idx].goals;
+      athlete.assists = state.athletes[idx].assists;
+      athlete.createdAt = state.athletes[idx].createdAt;
+      state.athletes[idx] = athlete;
+    }
+    notify('Atualizado!', `${name} foi atualizado com sucesso.`, '✅');
+  } else {
+    state.athletes.push(athlete);
+    generatePaymentForAthlete(athlete);
+    notify('Cadastrado!', `${name} foi adicionado à lista.`, '✅');
+  }
+
+  saveData();
+  updateAll();
+  closeModal('modalAthletes');
+}
+
+function editAthlete(id) {
+  const a = state.athletes.find(a => a.id === id);
+  if (!a) return;
+  document.getElementById('athleteId').value = a.id;
+  document.getElementById('athleteModalTitle').textContent = '✏️ Editar Atleta';
+  document.getElementById('athleteName').value = a.name;
+  document.getElementById('athleteNick').value = a.nick || '';
+  document.getElementById('athletePosition').value = a.position;
+  document.getElementById('athleteSkill').value = a.skill;
+  document.getElementById('athleteFoot').value = a.foot || 'Direito';
+  document.getElementById('athletePhone').value = a.phone || '';
+  document.getElementById('athleteEmail').value = a.email || '';
+  document.getElementById('athleteFee').value = a.fee;
+  document.getElementById('athleteStatus').value = a.status;
+  document.getElementById('athleteNotes').value = a.notes || '';
+  openModal('modalAthletes');
+}
+
+function deleteAthlete(id) {
+  const a = state.athletes.find(a => a.id === id);
+  if (!a) return;
+  if (!confirm(`Deseja remover ${a.name}?`)) return;
+  state.athletes = state.athletes.filter(a => a.id !== id);
+  saveData();
+  updateAll();
+  notify('Removido', `${a.name} foi removido.`, '🗑️');
+}
+
+function renderAthletes() {
+  const tbody = document.getElementById('athletesTable');
+  const search = (document.getElementById('searchAthletes')?.value || '').toLowerCase();
+  const posFilter = document.getElementById('filterPosition')?.value || '';
+
+  let list = state.athletes.filter(a => {
+    const matchSearch = a.name.toLowerCase().includes(search) ||
+                        (a.nick || '').toLowerCase().includes(search);
+    const matchPos = !posFilter || a.position === posFilter;
+    return matchSearch && matchPos;
+  });
+
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8">
+      <div class="empty-state">
+        <div class="icon">👤</div>
+        <div class="title">Nenhum atleta encontrado</div>
+        <div class="desc">Tente mudar os filtros ou cadastre novos atletas</div>
+        <button class="btn btn-primary" onclick="openModal('modalAthletes')">+ Cadastrar Atleta</button>
+      </div>
+    </td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map(a => {
+    const [bgColor, textColor] = POSITION_COLORS[a.position] || ['#888','#fff'];
+    const statusMap = {
+      'Ativo': 'badge-green', 'Inativo': 'badge-gray', 'Suspenso': 'badge-red'
+    };
+    const payStatus = getAthletePayStatus(a.id);
+    const stars = '★'.repeat(Math.round(a.skill / 2)) + '☆'.repeat(5 - Math.round(a.skill / 2));
+    const initials = a.name.split(' ').map(n => n[0]).slice(0,2).join('').toUpperCase();
+
+    return `<tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="avatar" style="background:${bgColor};color:${textColor}">${initials}</div>
+          <div>
+            <div style="font-weight:700">${a.name}</div>
+            <div style="font-size:11px;color:var(--text-muted)">${a.nick || '—'}</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <span class="badge" style="background:${bgColor}22;color:${bgColor}">${a.position}</span>
+      </td>
+      <td>
+        <div class="stars" title="Nível ${a.skill}/10">${stars}</div>
+        <div style="font-size:11px;color:var(--text-muted)">${a.skill}/10</div>
+      </td>
+      <td><span style="font-weight:700;color:var(--highlight)">${a.goals || 0} ⚽</span></td>
+      <td><span style="font-weight:700;color:var(--info)">${a.assists || 0} 🎯</span></td>
+      <td><span class="badge ${statusMap[a.status] || 'badge-gray'}">${a.status}</span></td>
+      <td><span class="badge ${payStatus.cls}">${payStatus.label}</span></td>
+      <td>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="editAthlete('${a.id}')">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteAthlete('${a.id}')">🗑️</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function getAthletePayStatus(athleteId) {
+  const now = new Date();
+  const currentMonth = now.getMonth() + 1;
+  const currentYear = now.getFullYear();
+  const payment = state.transactions.find(t =>
+    t.athleteId === athleteId &&
+    t.type === 'payment' &&
+    t.month === currentMonth &&
+    t.year === currentYear
+  );
+  if (!payment) return { cls: 'badge-red', label: 'Pendente' };
+  if (payment.status === 'paid') return { cls: 'badge-green', label: 'Pago' };
+  return { cls: 'badge-yellow', label: 'Pendente' };
+}
+
+// ════════════════════════════════════════════
+//  DRAW / SORTEIO
+// ════════════════════════════════════════════
+function performDraw() {
+  const active = state.athletes.filter(a => a.status === 'Ativo');
+  if (active.length < 6) {
+    notify('Atenção', 'São necessários pelo menos 6 atletas ativos para o sorteio.', '⚠️');
+    return;
+  }
+
+  const numTeams = parseInt(state.settings.numTeams) || 3;
+  document.getElementById('drawEmoji').textContent = '🎲';
+  document.getElementById('drawEmoji').classList.add('pulse');
+  document.getElementById('drawStatus').textContent = 'Sorteando...';
+
+  setTimeout(() => {
+    const teams = balancedDraw(active, numTeams);
+    state.teams = teams;
+    state.drawCount++;
+    document.getElementById('drawEmoji').classList.remove('pulse');
+    document.getElementById('drawEmoji').textContent = '✅';
+    document.getElementById('drawStatus').textContent =
+      `Sorteio #${state.drawCount} realizado! ${active.length} atletas divididos em ${numTeams} times.`;
+
+    saveData();
+    renderTeams(teams);
+    updateDashboard();
+    notify('Sorteio Realizado!', `${active.length} atletas divididos em ${numTeams} times.`, '🎲');
+  }, 800);
+}
+
+function balancedDraw(athletes, numTeams) {
+  // Agrupa por posição
+  const byPosition = {};
+  athletes.forEach(a => {
+    if (!byPosition[a.position]) byPosition[a.position] = [];
+    byPosition[a.position].push({...a});
+  });
+
+  // Embaralha cada grupo
+  Object.keys(byPosition).forEach(pos => {
+    byPosition[pos] = shuffle(byPosition[pos]);
+  });
+
+  // Inicializa times
+  const teams = Array.from({length: numTeams}, (_, i) => ({
+    ...TEAM_COLORS[i],
+    players: [],
+    totalSkill: 0,
+    id: i
+  }));
+
+  // Distribui por posição de forma equilibrada
+  Object.keys(byPosition).forEach(pos => {
+    const posPlayers = byPosition[pos];
+    // Ordena por habilidade decrescente para distribuição em serpentina
+    posPlayers.sort((a, b) => b.skill - a.skill);
+    posPlayers.forEach((player, idx) => {
+      // Serpentina: alterna direção para equilibrar
+      const teamIdx = idx % numTeams;
+      teams[teamIdx].players.push(player);
+      teams[teamIdx].totalSkill += player.skill;
+    });
+  });
+
+  // Rebalanceia se necessário
+  rebalanceTeams(teams);
+
+  return teams;
+}
+
+function rebalanceTeams(teams) {
+  let improved = true;
+  let iterations = 0;
+  while (improved && iterations < 20) {
+    improved = false;
+    iterations++;
+    for (let i = 0; i < teams.length; i++) {
+      for (let j = i + 1; j < teams.length; j++) {
+        const diff = Math.abs(teams[i].totalSkill - teams[j].totalSkill);
+        if (diff > 3) {
+          // Tenta trocar jogadores para equilibrar
+          for (let pi = 0; pi < teams[i].players.length; pi++) {
+            for (let pj = 0; pj < teams[j].players.length; pj++) {
+              const pa = teams[i].players[pi];
+              const pb = teams[j].players[pj];
+              if (pa.position === pb.position) {
+                const newDiff = Math.abs(
+                  (teams[i].totalSkill - pa.skill + pb.skill) -
+                  (teams[j].totalSkill - pb.skill + pa.skill)
+                );
+                if (newDiff < diff) {
+                  teams[i].players[pi] = pb;
+                  teams[j].players[pj] = pa;
+                  teams[i].totalSkill = teams[i].totalSkill - pa.skill + pb.skill;
+                  teams[j].totalSkill = teams[j].totalSkill - pb.skill + pa.skill;
+                  improved = true;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function renderTeams(teams) {
+  const container = document.getElementById('teamsContainer');
+  const grid = document.getElementById('teamsGrid');
+  container.style.display = 'block';
+
+  const maxSkill = Math.max(...teams.map(t => t.totalSkill));
+
+  grid.innerHTML = teams.map(team => {
+    const avgSkill = team.players.length > 0
+      ? (team.totalSkill / team.players.length).toFixed(1)
+      : 0;
+
+    const posCount = {};
+    team.players.forEach(p => {
+      posCount[p.position] = (posCount[p.position] || 0) + 1;
+    });
+
+    return `
+      <div class="team-card">
+        <div class="team-header" style="background:${team.bg}">
+          <div style="font-size:36px">${team.emoji}</div>
+          <div class="team-name" style="color:${team.text}">${team.name}</div>
+          <div class="team-count" style="color:${team.text}88">
+            ${team.players.length} jogadores · Média ${avgSkill}
+          </div>
+          <div style="margin-top:8px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
+            ${Object.entries(posCount).map(([pos, count]) =>
+              `<span style="background:rgba(0,0,0,0.2);color:${team.text};padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700">${pos}: ${count}</span>`
+            ).join('')}
+          </div>
+        </div>
+        <div class="team-players">
+          ${team.players.map(p => {
+            const [bg, tc] = POSITION_COLORS[p.position] || ['#888','#fff'];
+            const initials = p.name.split(' ').map(n=>n[0]).slice(0,2).join('').toUpperCase();
+            return `
+              <div class="player-row">
+                <div class="avatar" style="background:${bg};color:${tc};font-size:12px">${initials}</div>
+                <div class="player-info">
+                  <div class="player-name">${p.nick || p.name.split(' ')[0]}</div>
+                  <div class="player-pos">${p.position}</div>
+                </div>
+                <div class="player-rating">${p.skill}</div>
+              </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+  }).join('');
+
+  // Análise de equilíbrio
+  const balance = document.getElementById('balanceAnalysis');
+  const skills = teams.map(t => t.totalSkill);
+  const maxS = Math.max(...skills);
+  const minS = Math.min(...skills);
+  const diff = maxS - minS;
+  const balanceScore = diff === 0 ? 100 : Math.max(0, Math.round(100 - (diff / maxS) * 100));
+
+  balance.innerHTML = `
+    <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
+      <div style="text-align:center">
+        <div style="font-size:32px;font-weight:800;color:${balanceScore >= 80 ? 'var(--success)' : balanceScore >= 60 ? 'var(--warning)' : 'var(--highlight)'}">${balanceScore}%</div>
+        <div style="font-size:12px;color:var(--text-muted)">Índice de Equilíbrio</div>
+      </div>
+      <div style="flex:1">
+        ${teams.map(t => `
+          <div class="chart-bar-item">
+            <div class="chart-bar-label">${t.emoji} ${t.name.replace('Time ','')}</div>
+            <div class="chart-bar-track">
+              <div class="chart-bar-fill" style="width:${maxS > 0 ? Math.round((t.totalSkill/maxS)*100) : 0}%;background:${t.bg}">
+                ${t.totalSkill} pts
+              </div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text-muted)">
+      Diferença entre o time mais forte e o mais fraco: <strong style="color:var(--text)">${diff} pontos</strong>
+    </div>`;
+}
+
+function clearDraw() {
+  state.teams = [];
+  document.getElementById('teamsContainer').style.display = 'none';
+  document.getElementById('drawEmoji').textContent = '🎲';
+  document.getElementById('drawStatus').textContent = 'Aguardando atletas para sortear...';
+  saveData();
+}
+
+// ════════════════════════════════════════════
+//  SCORES / PONTUAÇÃO
+// ════════════════════════════════════════════
+function buildMatchInputs() {
+  const active = state.athletes.filter(a => a.status === 'Ativo');
+  const goalsDiv = document.getElementById('goalsInputList');
+  const assistsDiv = document.getElementById('assistsInputList');
+  if (!goalsDiv || !assistsDiv) return;
+
+  if (active.length === 0) {
+    goalsDiv.innerHTML = '<div style="color:var(--text-muted);font-size:14px">Nenhum atleta ativo.</div>';
+    assistsDiv.innerHTML = '';
+    return;
+  }
+
+  const renderInputs = (container, type) => {
+    container.innerHTML = active.map(a => {
+      const [bg, tc] = POSITION_COLORS[a.position] || ['#888','#fff'];
+      const initials = a.name.split(' ').map(n=>n[0]).slice(0,2).join('').toUpperCase();
+      return `
+        <div class="score-input-row">
+          <div class="avatar" style="background:${bg};color:${tc};font-size:12px">${initials}</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600">${a.name}</div>
+            <div style="font-size:11px;color:var(--text-muted)">${a.position}</div>
+          </div>
+          <div class="score-controls">
+            <button class="score-btn sub" onclick="adjustScore('${type}','${a.id}',-1)">−</button>
+            <span class="score-num" id="${type}_${a.id}">0</span>
+            <button class="score-btn add" onclick="adjustScore('${type}','${a.id}',1)">+</button>
+          </div>
+        </div>`;
+    }).join('');
+  };
+
+  renderInputs(goalsDiv, 'goal');
+  renderInputs(assistsDiv, 'assist');
+}
+
+let tempScores = {};
+
+function adjustScore(type, athleteId, delta) {
+  const key = `${type}_${athleteId}`;
+  tempScores[key] = Math.max(0, (tempScores[key] || 0) + delta);
+  const el = document.getElementById(key);
+  if (el) el.textContent = tempScores[key];
+}
+
+function saveMatch() {
+  const date = document.getElementById('matchDate')?.value;
+  const teamA = document.getElementById('matchTeamA')?.value || 'Time A';
+  const teamB = document.getElementById('matchTeamB')?.value || 'Time B';
+
+  if (!date) { notify('Atenção', 'Informe a data da partida.', '⚠️'); return; }
+
+  const match = {
+    id: Date.now().toString(),
+    date,
+    teamA,
+    teamB,
+    scores: { ...tempScores },
+    createdAt: new Date().toISOString()
+  };
+
+  // Atualiza gols e assistências dos atletas
+  Object.entries(tempScores).forEach(([key, value]) => {
+    const [type, athleteId] = key.split('_');
+    const athlete = state.athletes.find(a => a.id === athleteId);
+    if (athlete && value > 0) {
+      if (type === 'goal') athlete.goals = (athlete.goals || 0) + value;
+      if (type === 'assist') athlete.assists = (athlete.assists || 0) + value;
+    }
+  });
+
+  state.matches.push(match);
+  tempScores = {};
+  saveData();
+  updateAll();
+  closeModal('modalMatch');
+  notify('Partida Salva!', `Partida de ${date} registrada com sucesso.`, '⚽');
+}
+
+function renderScores() {
+  renderGoalsBoard();
+  renderAssistsBoard();
+  renderMatchHistory();
+}
+
+function renderGoalsBoard() {
+  const el = document.getElementById('goalsBoard');
+  if (!el) return;
+  const sorted = [...state.athletes].filter(a => (a.goals || 0) > 0).sort((a,b) => b.goals - a.goals);
+
+  if (sorted.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="icon">⚽</div><div class="title">Nenhum gol registrado</div></div>`;
+    return;
+  }
+
+  const max = sorted[0].goals;
+  el.innerHTML = sorted.map((a, i) => {
+    const [bg] = POSITION_COLORS[a.position] || ['#888'];
+    const initials = a.name.split(' ').map(n=>n[0]).slice(0,2).join('').toUpperCase();
+    return `
+      <div class="rank-row">
+        <div class="rank-num ${i<3?'rank-'+(i+1):''}">${i+1}</div>
+        <div class="avatar" style="background:${bg};color:#000;font-size:12px">${initials}</div>
+        <div class="rank-info">
+          <div class="rank-name">${a.name}</div>
+          <div class="rank-pos">${a.position}</div>
+          <div class="progress-bar" style="width:180px">
+            <div class="progress-fill" style="width:${Math.round((a.goals/max)*100)}%;background:var(--highlight)"></div>
+          </div>
+        </div>
+        <div class="rank-score">${a.goals} ⚽</div>
+      </div>`;
+  }).join('');
+}
+
+function renderAssistsBoard() {
+  const el = document.getElementById('assistsBoard');
+  if (!el) return;
+  const sorted = [...state.athletes].filter(a => (a.assists || 0) > 0).sort((a,b) => b.assists - a.assists);
+
+  if (sorted.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="icon">🎯</div><div class="title">Nenhuma assistência registrada</div></div>`;
+    return;
+  }
+
+  const max = sorted[0].assists;
+  el.innerHTML = sorted.map((a, i) => {
+    const [bg] = POSITION_COLORS[a.position] || ['#888'];
+    const initials = a.name.split(' ').map(n=>n[0]).slice(0,2).join('').toUpperCase();
+    return `
+      <div class="rank-row">
+        <div class="rank-num ${i<3?'rank-'+(i+1):''}">${i+1}</div>
+        <div class="avatar" style="background:${bg};color:#000;font-size:12px">${initials}</div>
+        <div class="rank-info">
+          <div class="rank-name">${a.name}</div>
+          <div class="rank-pos">${a.position}</div>
+          <div class="progress-bar" style="width:180px">
+            <div class="progress-fill" style="width:${Math.round((a.assists/max)*100)}%;background:var(--info)"></div>
+          </div>
+        </div>
+        <div class="rank-score" style="color:var(--info)">${a.assists} 🎯</div>
+      </div>`;
+  }).join('');
+}
+
+function renderMatchHistory() {
+  const el = document.getElementById('matchHistory');
+  if (!el) return;
+
+  if (state.matches.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="icon">📋</div><div class="title">Nenhuma partida registrada</div></div>`;
+    return;
+  }
+
+  el.innerHTML = [...state.matches].reverse().map(m => {
+    const goalsCount = Object.entries(m.scores)
+      .filter(([k]) => k.startsWith('goal_'))
+      .reduce((s,[,v]) => s+v, 0);
+    const assistsCount = Object.entries(m.scores)
+      .filter(([k]) => k.startsWith('assist_'))
+      .reduce((s,[,v]) => s+v, 0);
+
+    return `
+      <div class="transaction-row">
+        <div class="transaction-icon" style="background:rgba(233,69,96,0.15);font-size:22px">⚽</div>
+        <div>
+          <div style="font-weight:700">${m.teamA} vs ${m.teamB}</div>
+          <div style="font-size:12px;color:var(--text-muted)">${formatDate(m.date)}</div>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:10px">
+          <span class="score-pill">⚽ ${goalsCount} gols</span>
+          <span class="score-pill">🎯 ${assistsCount} assists</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════
+//  RANKING
+// ════════════════════════════════════════════
+function renderRanking() {
+  renderRankingGoals();
+  renderRankingAssists();
+  renderRankingOverall();
+}
+
+function renderRankingGoals() {
+  const el = document.getElementById('rankingGoals');
+  if (!el) return;
+  const sorted = [...state.athletes].sort((a,b) => (b.goals||0)-(a.goals||0));
+  renderRankList(el, sorted, a => `${a.goals||0} ⚽`, 'var(--highlight)');
+}
+
+function renderRankingAssists() {
+  const el = document.getElementById('rankingAssists');
+  if (!el) return;
+  const sorted = [...state.athletes].sort((a,b) => (b.assists||0)-(a.assists||0));
+  renderRankList(el, sorted, a => `${a.assists||0} 🎯`, 'var(--info)');
+}
+
+function renderRankingOverall() {
+  const el = document.getElementById('rankingOverall');
+  if (!el) return;
+  const sorted = [...state.athletes]
+    .map(a => ({...a, points: (a.goals||0)*2 + (a.assists||0)}))
+    .sort((a,b) => b.points - a.points);
+
+  if (sorted.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="icon">🏆</div><div class="title">Nenhuma pontuação ainda</div></div>`;
+    return;
+  }
+
+  el.innerHTML = `<div class="table-wrap"><table>
+    <thead><tr>
+      <th>#</th><th>Atleta</th><th>Posição</th><th>Gols</th><th>Assists</th><th>Pontos</th><th>Nível</th>
+    </tr></thead>
+    <tbody>
+      ${sorted.map((a, i) => {
+        const [bg, tc] = POSITION_COLORS[a.position] || ['#888','#fff'];
+        const initials = a.name.split(' ').map(n=>n[0]).slice(0,2).join('').toUpperCase();
+        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1);
+        return `<tr>
+          <td><strong>${medal}</strong></td>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="avatar" style="background:${bg};color:${tc};font-size:12px">${initials}</div>
+              <div>
+                <div style="font-weight:700">${a.name}</div>
+                <div style="font-size:11px;color:var(--text-muted)">${a.nick||'—'}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="badge" style="background:${bg}22;color:${bg}">${a.position}</span></td>
+          <td style="font-weight:700;color:var(--highlight)">${a.goals||0}</td>
+          <td style="font-weight:700;color:var(--info)">${a.assists||0}</td>
+          <td style="font-weight:800;color:var(--warning);font-size:18px">${a.points}</td>
+          <td>${'★'.repeat(Math.round(a.skill/2))}${'☆'.repeat(5-Math.round(a.skill/2))}</td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table></div>`;
+}
+
+function renderRankList(el, sorted, valueFn, color) {
+  if (sorted.length === 0) {
+    el.innerHTML = `<div class="empty-state" style="padding:30px"><div class="icon">🏆</div><div class="title">Sem dados</div></div>`;
+    return;
+  }
+  el.innerHTML = sorted.slice(0, 10).map((a, i) => {
+    const [bg, tc] = POSITION_COLORS[a.position] || ['#888','#fff'];
+    const initials = a.name.split(' ').map(n=>n[0]).slice(0,2).join('').toUpperCase();
+    return `
+      <div class="rank-row">
+        <div class="rank-num ${i<3?'rank-'+(i+1):''}">${i<3?['🥇','🥈','🥉'][i]:i+1}</div>
+        <div class="avatar" style="background:${bg};color:${tc};font-size:12px">${initials}</div>
+        <div class="rank-info">
+          <div class="rank-name">${a.name}</div>
+          <div class="rank-pos">${a.position}</div>
+        </div>
+        <div style="font-size:16px;font-weight:800;color:${color}">${valueFn(a)}</div>
+      </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════
+//  FINANCIAL
+// ════════════════════════════════════════════
+function saveTransaction() {
+  const type = document.getElementById('transType').value;
+  const value = parseFloat(document.getElementById('transValue').value);
+  const date = document.getElementById('transDate').value;
+  const desc = document.getElementById('transDesc').value.trim();
+  const cat = document.getElementById('transCat').value;
+
+  if (!value || value <= 0) { notify('Atenção', 'Informe um valor válido.', '⚠️'); return; }
+  if (!date) { notify('Atenção', 'Informe a data.', '⚠️'); return; }
+  if (!desc) { notify('Atenção', 'Informe a descrição.', '⚠️'); return; }
+
+  state.transactions.push({
+    id: Date.now().toString(),
+    type,
+    value,
+    date,
+    desc,
+    cat,
+    createdAt: new Date().toISOString()
+  });
+
+  saveData();
+  updateAll();
+  closeModal('modalTransaction');
+  notify('Transação Salva!', `${type === 'entrada' ? 'Entrada' : 'Saída'} de R$ ${value.toFixed(2)} registrada.`, '💰');
+}
+
+function renderFinancial() {
+  const transactions = state.transactions.filter(t => !t.type.includes('payment'));
+  const income = transactions.filter(t => t.type === 'entrada').reduce((s, t) => s + t.value, 0);
+  const expense = transactions.filter(t => t.type === 'saida').reduce((s, t) => s + t.value, 0);
+  const balance = income - expense;
+
+  const fmtEl = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = formatCurrency(val);
+  };
+
+  fmtEl('finIncome', income);
+  fmtEl('finExpense', expense);
+
+  const balEl = document.getElementById('finBalance');
+  if (balEl) {
+    balEl.textContent = formatCurrency(balance);
+    balEl.style.color = balance >= 0 ? 'var(--success)' : 'var(--highlight)';
+  }
+
+  const el = document.getElementById('transactionsList');
+  if (!el) return;
+
+  if (transactions.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="icon">💰</div><div class="title">Nenhuma transação</div><div class="desc">Registre entradas e saídas financeiras</div></div>`;
+    return;
+  }
+
+  el.innerHTML = [...transactions].reverse().map(t => {
+    const isIn = t.type === 'entrada';
+    const icons = { 'Mensalidade':'💳','Equipamentos':'👕','Aluguel de Quadra':'🏟️','Premiação':'🏆','Patrocínio':'🤝','Outros':'📄','Taxa de Inscrição':'📝' };
+    return `
+      <div class="transaction-row">
+        <div class="transaction-icon" style="background:${isIn?'rgba(11,232,129,0.1)':'rgba(233,69,96,0.1)'}">
+          ${icons[t.cat] || (isIn ? '⬆️' : '⬇️')}
+        </div>
+        <div>
+          <div style="font-weight:700">${t.desc}</div>
+          <div style="font-size:12px;color:var(--text-muted)">${t.cat} · ${formatDate(t.date)}</div>
+        </div>
+        <div class="transaction-amount ${isIn?'amount-in':'amount-out'}">
+          ${isIn?'+':'-'} ${formatCurrency(t.value)}
+        </div>
+        <button class="btn btn-danger btn-sm" style="margin-left:8px" onclick="deleteTransaction('${t.id}')">🗑️</button>
+      </div>`;
+  }).join('');
+}
+
+function deleteTransaction(id) {
+  if (!confirm('Remover esta transação?')) return;
+  state.transactions = state.transactions.filter(t => t.id !== id);
+  saveData();
+  renderFinancial();
+  renderDashboard();
+}
+
+// ════════════════════════════════════════════
+//  PAYMENTS / MENSALIDADES
+// ════════════════════════════════════════════
+function generatePaymentForAthlete(athlete) {
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const year = now.getFullYear();
+  const exists = state.transactions.find(t =>
+    t.athleteId === athlete.id && t.type === 'payment' &&
+    t.month === month && t.year === year
+  );
+  if (!exists) {
+    state.transactions.push({
+      id: Date.now().toString() + Math.random(),
+      type: 'payment',
+      athleteId: athlete.id,
+      athleteName: athlete.name,
+      value: athlete.fee,
+      month,
+      year,
+      status: 'pending',
+      dueDate: `${year}-${String(month).padStart(2,'0')}-${String(state.settings.dueDay||10).padStart(2,'0')}`,
+      createdAt: new Date().toISOString()
+    });
+  }
+}
+
+function renderPayments() {
+  const tbody = document.getElementById('paymentsTable');
+  if (!tbody) return;
+  const monthFilter = parseInt(document.getElementById('monthFilter')?.value) || 0;
+
+  let payments = state.transactions.filter(t => t.type === 'payment');
+  if (monthFilter) payments = payments.filter(t => t.month === monthFilter);
+
+  if (payments.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="icon">💳</div><div class="title">Nenhuma mensalidade</div></div></td></tr>`;
+    return;
+  }
+
+  const monthNames = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+  tbody.innerHTML = payments.map(p => {
+    const statusCls = p.status === 'paid' ? 'badge-green' : 'badge-red';
+    const statusLabel = p.status === 'paid' ? 'Pago' : 'Pendente';
+    return `<tr>
+      <td><strong>${p.athleteName}</strong></td>
+      <td>${monthNames[p.month]} ${p.year}</td>
+      <td>${formatCurrency(p.value)}</td>
+      <td>${formatDate(p.dueDate)}</td>
+      <td><span class="badge ${statusCls}">${statusLabel}</span></td>
+      <td>
+        ${p.status !== 'paid'
+          ? `<button class="btn btn-success btn-sm" onclick="markPayment('${p.id}','paid')">✓ Marcar Pago</button>`
+          : `<button class="btn btn-ghost btn-sm" onclick="markPayment('${p.id}','pending')">↩ Reverter</button>`
+        }
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function markPayment(id, status) {
+  const p = state.transactions.find(t => t.id === id);
+  if (!p) return;
+  p.status = status;
+  if (status === 'paid') {
+    notify('Pagamento', `Mensalidade de ${p.athleteName} confirmada!`, '✅');
+  }
+  saveData();
+  renderPayments();
+  renderDashboard();
+}
+
+function markAllPaid() {
+  if (!confirm('Marcar todos como pagos?')) return;
+  state.transactions.filter(t => t.type === 'payment' && t.status === 'pending')
+    .forEach(t => t.status = 'paid');
+  saveData();
+  renderPayments();
+  renderDashboard();
+  notify('Mensalidades', 'Todas as mensalidades marcadas como pagas.', '✅');
+}
+
+// ════════════════════════════════════════════
+//  DASHBOARD
+// ════════════════════════════════════════════
+function renderDashboard() {
+  updateDashboard();
+  renderDashRanking();
+  renderDashFinancial();
+  renderPositionChart();
+}
+
+function updateDashboard() {
+  function setEl(id, value, className) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = value;
+    if (className) el.className = className;
+  }
+
+  setEl('statAthletes', state.athletes.length);
+  setEl('statAthletesChange',
+    state.athletes.filter(a => a.status === 'Ativo').length + ' ativos'
+  );
+
+  const income  = state.transactions.filter(t => t.type === 'entrada').reduce((s,t) => s + t.value, 0);
+  const expense = state.transactions.filter(t => t.type === 'saida').reduce((s,t) => s + t.value, 0);
+  const balance = income - expense;
+
+  setEl('statBalance', formatCurrency(balance));
+
+  // funciona com qualquer um dos dois IDs (statBalanceChange ou statBalanceInfo)
+  const balChangeEl = document.getElementById('statBalanceChange') || document.getElementById('statBalanceInfo');
+  if (balChangeEl) {
+    balChangeEl.textContent = 'Entradas: ' + formatCurrency(income);
+    balChangeEl.className   = 'stat-change ' + (balance >= 0 ? 'up' : 'down');
+  }
+
+  const totalGoals = state.athletes.reduce((s,a) => s + (a.goals || 0), 0);
+  setEl('statGoals', totalGoals);
+
+  const topScorer = [...state.athletes].sort((a,b) => (b.goals||0) - (a.goals||0))[0];
+  setEl('statGoalsTop',
+    topScorer && topScorer.goals > 0 ? 'Top: ' + topScorer.name.split(' ')[0] : '—'
+  );
+
+  setEl('statDraws', state.drawCount);
+  updateBadge();
+}
+
+function renderDashRanking() {
+  const el = document.getElementById('dashRanking');
+  if (!el) return;
+  const sorted = [...state.athletes]
+    .map(a => ({...a, pts: (a.goals||0)*2+(a.assists||0)}))
+    .sort((a,b) => b.pts - a.pts)
+    .slice(0, 5);
+
+  if (sorted.length === 0 || sorted[0].pts === 0) {
+    el.innerHTML = `<div class="empty-state" style="padding:30px"><div class="icon">⚽</div><div class="title" style="font-size:14px">Nenhuma pontuação ainda</div></div>`;
+    return;
+  }
+
+  el.innerHTML = sorted.map((a, i) => {
+    const [bg,tc] = POSITION_COLORS[a.position]||['#888','#fff'];
+    const initials = a.name.split(' ').map(n=>n[0]).slice(0,2).join('').toUpperCase();
+    const medals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+    return `
+      <div class="rank-row">
+        <div class="rank-num">${medals[i]}</div>
+        <div class="avatar" style="background:${bg};color:${tc};font-size:12px">${initials}</div>
+        <div class="rank-info">
+          <div class="rank-name">${a.name}</div>
+          <div class="rank-pos">${a.position} · ${a.goals||0} gols · ${a.assists||0} assists</div>
+        </div>
+        <div style="font-weight:800;color:var(--warning)">${a.pts} pts</div>
+      </div>`;
+  }).join('');
+}
+
+function renderDashFinancial() {
+  const el = document.getElementById('dashFinancial');
+  if (!el) return;
+  const total = state.athletes.length;
+  const paid = state.transactions.filter(t=>t.type==='payment'&&t.status==='paid').length;
+  const pending = state.transactions.filter(t=>t.type==='payment'&&t.status==='pending').length;
+  const income = state.transactions.filter(t=>t.type==='entrada').reduce((s,t)=>s+t.value,0);
+  const expense = state.transactions.filter(t=>t.type==='saida').reduce((s,t)=>s+t.value,0);
+
+  if (total === 0) {
+    el.innerHTML = `<div class="empty-state" style="padding:30px"><div class="icon">💰</div><div class="title" style="font-size:14px">Nenhum dado financeiro</div></div>`;
+    return;
+  }
+
+  el.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:rgba(11,232,129,0.08);border-radius:8px">
+        <span style="font-size:13px">✅ Mensalidades Pagas</span>
+        <span style="font-weight:800;color:var(--success)">${paid}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:rgba(233,69,96,0.08);border-radius:8px">
+        <span style="font-size:13px">⏳ Mensalidades Pendentes</span>
+        <span style="font-weight:800;color:var(--highlight)">${pending}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:rgba(255,255,255,0.04);border-radius:8px">
+        <span style="font-size:13px">💵 Total Entradas</span>
+        <span style="font-weight:800;color:var(--success)">${formatCurrency(income)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:rgba(255,255,255,0.04);border-radius:8px">
+        <span style="font-size:13px">💸 Total Saídas</span>
+        <span style="font-weight:800;color:var(--highlight)">${formatCurrency(expense)}</span>
+      </div>
+    </div>`;
+}
+
+function renderPositionChart() {
+  const el = document.getElementById('dashPositionChart');
+  if (!el) return;
+  const positions = ['Goleiro','Defensor','Meio-campo','Atacante'];
+  const counts = positions.map(p => state.athletes.filter(a=>a.position===p).length);
+  const max = Math.max(...counts, 1);
+  const colors = ['#f8b739','#53d8fb','#0be881','#e94560'];
+
+  if (state.athletes.length === 0) {
+    el.innerHTML = `<div style="color:var(--text-muted);font-size:14px;padding:20px 0">Nenhum atleta cadastrado ainda.</div>`;
+    return;
+  }
+
+  el.innerHTML = positions.map((pos, i) => `
+    <div class="chart-bar-item">
+      <div class="chart-bar-label">${pos}</div>
+      <div class="chart-bar-track">
+        <div class="chart-bar-fill" style="width:${Math.round((counts[i]/max)*100)}%;background:${colors[i]}">
+          ${counts[i] > 0 ? counts[i] : ''}
+        </div>
+      </div>
+      <div style="font-size:12px;width:24px;text-align:right;color:var(--text-muted)">${counts[i]}</div>
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════════
+//  REPORTS
+// ════════════════════════════════════════════
+function renderReports() {
+  renderReportByPosition();
+  renderReportFinancial();
+  renderReportTable();
+}
+
+function renderReportByPosition() {
+  const el = document.getElementById('reportByPosition');
+  if (!el) return;
+  const positions = ['Goleiro','Defensor','Meio-campo','Atacante'];
+  const colors = ['#f8b739','#53d8fb','#0be881','#e94560'];
+
+  if (state.athletes.length === 0) {
+    el.innerHTML = `<div class="empty-state" style="padding:30px"><div class="icon">📊</div><div class="title">Sem dados</div></div>`;
+    return;
+  }
+
+  el.innerHTML = positions.map((pos, i) => {
+    const group = state.athletes.filter(a => a.position === pos);
+    const avgSkill = group.length > 0 ? (group.reduce((s,a)=>s+a.skill,0)/group.length).toFixed(1) : 0;
+    const goals = group.reduce((s,a)=>s+(a.goals||0),0);
+    const assists = group.reduce((s,a)=>s+(a.assists||0),0);
+    return `
+      <div style="padding:12px;background:rgba(255,255,255,0.03);border-radius:8px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-weight:700;color:${colors[i]}">${pos}</span>
+          <span style="font-size:12px;color:var(--text-muted)">${group.length} atletas</span>
+        </div>
+        <div style="display:flex;gap:16px;font-size:13px">
+          <span>⭐ Nível médio: <strong>${avgSkill}</strong></span>
+          <span>⚽ Gols: <strong>${goals}</strong></span>
+          <span>🎯 Assists: <strong>${assists}</strong></span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderReportFinancial() {
+  const el = document.getElementById('reportFinancial');
+  if (!el) return;
+  const income = state.transactions.filter(t=>t.type==='entrada').reduce((s,t)=>s+t.value,0);
+  const expense = state.transactions.filter(t=>t.type==='saida').reduce((s,t)=>s+t.value,0);
+  const balance = income - expense;
+  const paidCount = state.transactions.filter(t=>t.type==='payment'&&t.status==='paid').length;
+  const pendingCount = state.transactions.filter(t=>t.type==='payment'&&t.status==='pending').length;
+  const paidValue = state.transactions
+    .filter(t=>t.type==='payment'&&t.status==='paid')
+    .reduce((s,t)=>s+t.value,0);
+
+  el.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:10px">
+      ${[
+        ['Total de Entradas', formatCurrency(income), 'var(--success)', '💵'],
+        ['Total de Saídas', formatCurrency(expense), 'var(--highlight)', '💸'],
+        ['Saldo Atual', formatCurrency(balance), balance>=0?'var(--success)':'var(--highlight)', '💰'],
+        ['Mensalidades Pagas', `${paidCount} (${formatCurrency(paidValue)})`, 'var(--success)', '✅'],
+        ['Mensalidades Pendentes', `${pendingCount}`, 'var(--warning)', '⏳'],
+        ['Total de Partidas', state.matches.length, 'var(--info)', '⚽'],
+        ['Total de Sorteios', state.drawCount, 'var(--warning)', '🎲'],
+      ].map(([label, val, color, icon]) => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:rgba(255,255,255,0.04);border-radius:8px">
+          <span style="font-size:13px">${icon} ${label}</span>
+          <span style="font-weight:800;color:${color}">${val}</span>
+        </div>`).join('')}
+    </div>`;
+}
+
+function renderReportTable() {
+  const tbody = document.getElementById('reportTable');
+  if (!tbody) return;
+
+  if (state.athletes.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:30px">Nenhum atleta cadastrado</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = state.athletes.map(a => {
+    const points = (a.goals||0)*2 + (a.assists||0);
+    const payStatus = getAthletePayStatus(a.id);
+    return `<tr>
+      <td><strong>${a.name}</strong></td>
+      <td>${a.position}</td>
+      <td>${a.skill}/10</td>
+      <td style="color:var(--highlight);font-weight:700">${a.goals||0}</td>
+      <td style="color:var(--info);font-weight:700">${a.assists||0}</td>
+      <td style="color:var(--warning);font-weight:800">${points}</td>
+      <td><span class="badge ${payStatus.cls}">${payStatus.label}</span></td>
+      <td>${state.drawCount}</td>
+    </tr>`;
+  }).join('');
+}
+
+function exportReport() {
+  let text = `RELATÓRIO SPORTMANAGER PRO\n`;
+  text += `Gerado em: ${new Date().toLocaleString('pt-BR')}\n\n`;
+  text += `=== ATLETAS ===\n`;
+  state.athletes.forEach(a => {
+    text += `${a.name} | ${a.position} | Nível: ${a.skill} | Gols: ${a.goals||0} | Assists: ${a.assists||0}\n`;
+  });
+  text += `\n=== FINANCEIRO ===\n`;
+  const income = state.transactions.filter(t=>t.type==='entrada').reduce((s,t)=>s+t.value,0);
+  const expense = state.transactions.filter(t=>t.type==='saida').reduce((s,t)=>s+t.value,0);
+  text += `Entradas: ${formatCurrency(income)}\nSaídas: ${formatCurrency(expense)}\nSaldo: ${formatCurrency(income-expense)}\n`;
+
+  const blob = new Blob([text], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'relatorio_sportmanager.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+  notify('Exportado!', 'Relatório baixado com sucesso.', '📥');
+}
+
+// ════════════════════════════════════════════
+//  SETTINGS
+// ════════════════════════════════════════════
+function saveSettings() {
+  state.settings = {
+    clubName: document.getElementById('settClubName')?.value || 'SportManager Pro',
+    monthlyFee: parseFloat(document.getElementById('settMonthlyFee')?.value) || 80,
+    dueDay: parseInt(document.getElementById('settDueDay')?.value) || 10,
+    numTeams: parseInt(document.getElementById('settNumTeams')?.value) || 3,
+    season: document.getElementById('settSeason')?.value || '2026'
+  };
+  saveData();
+}
+
+function setAccentColor(color) {
+  document.documentElement.style.setProperty('--highlight', color);
+  document.documentElement.style.setProperty('--gradient-2', `linear-gradient(135deg, ${color}, ${color}cc)`);
+  notify('Cor alterada!', 'Cor de destaque atualizada.', '🎨');
+}
+
+function generateSampleData() {
+  if (!confirm('Isso irá gerar dados de exemplo. Continuar?')) return;
+
+  const names = [
+    ['Carlos Silva', 'Carlão'], ['João Pereira', 'Joãozinho'], ['Pedro Santos', 'Pedrão'],
+    ['Lucas Oliveira', 'Luca'], ['Rafael Costa', 'Rafa'], ['André Lima', 'Dedé'],
+    ['Marcos Souza', 'Marquinhos'], ['Felipe Rocha', 'Felipão'], ['Rodrigo Alves', 'Rôdrigo'],
+    ['Thiago Mendes', 'Thiagão'], ['Bruno Ferreira', 'Bruninho'], ['Gabriel Neves', 'Gabigol'],
+    ['Gustavo Castro', 'Guga'], ['Diego Martins', 'Diegão'], ['Leonardo Pinto', 'Leo']
+  ];
+
+  const positions = ['Goleiro','Goleiro','Defensor','Defensor','Defensor','Defensor','Meio-campo','Meio-campo','Meio-campo','Meio-campo','Atacante','Atacante','Atacante','Atacante','Atacante'];
+
+  names.forEach(([name, nick], i) => {
+    const position = positions[i % positions.length];
+    const athlete = {
+      id: Date.now().toString() + i + Math.random(),
+      name, nick, position,
+      skill: Math.floor(Math.random() * 5) + 6,
+      foot: ['Direito','Esquerdo','Ambidestro'][Math.floor(Math.random()*3)],
+      phone: `(11) 9${Math.floor(10000+Math.random()*90000)}-${Math.floor(1000+Math.random()*9000)}`,
+      email: `${name.split(' ')[0].toLowerCase()}@email.com`,
+      fee: 80,
+      status: 'Ativo',
+      notes: '',
+      goals: Math.floor(Math.random() * 12),
+      assists: Math.floor(Math.random() * 8),
+      createdAt: new Date().toISOString()
+    };
+    state.athletes.push(athlete);
+    generatePaymentForAthlete(athlete);
+  });
+
+  // Transações de exemplo
+  state.transactions.push(
+    { id: 'tx1', type: 'entrada', value: 1200, date: '2026-04-01', desc: 'Mensalidades Abril', cat: 'Mensalidade', createdAt: new Date().toISOString() },
+    { id: 'tx2', type: 'entrada', value: 500, date: '2026-04-10', desc: 'Patrocínio local', cat: 'Patrocínio', createdAt: new Date().toISOString() },
+    { id: 'tx3', type: 'saida', value: 300, date: '2026-04-05', desc: 'Aluguel da quadra', cat: 'Aluguel de Quadra', createdAt: new Date().toISOString() },
+    { id: 'tx4', type: 'saida', value: 150, date: '2026-04-12', desc: 'Compra de coletes', cat: 'Equipamentos', createdAt: new Date().toISOString() }
+  );
+
+  // Partida de exemplo
+  state.matches.push({
+    id: 'match1',
+    date: '2026-04-20',
+    teamA: 'Time Vermelho',
+    teamB: 'Time Verde',
+    scores: {},
+    createdAt: new Date().toISOString()
+  });
+
+  state.drawCount = 2;
+  saveData();
+  updateAll();
+  notify('Dados Gerados!', `${names.length} atletas de exemplo criados.`, '🎭');
+}
+
+function clearAllData() {
+  if (!confirm('Tem certeza? Todos os dados serão removidos permanentemente.')) return;
+  state = {
+    athletes: [],
+    transactions: [],
+    matches: [],
+    teams: [],
+    drawCount: 0,
+    settings: {
+      clubName: 'SportManager Pro',
+      monthlyFee: 80,
+      dueDay: 10,
+      numTeams: 3,
+      season: '2026'
+    }
+  };
+  saveData();
+  updateAll();
+  notify('Dados Removidos', 'Todos os dados foram apagados.', '🗑️');
+}
+
+// ════════════════════════════════════════════
+//  TABS
+// ════════════════════════════════════════════
+function switchTab(el, targetId) {
+  const parent = el.closest('.card') || el.closest('.page');
+  parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  parent.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const target = document.getElementById(targetId);
+  if (target) target.classList.add('active');
+}
+
+// ════════════════════════════════════════════
+//  NOTIFICATION
+// ════════════════════════════════════════════
+function notify(title, msg, icon = 'ℹ️') {
+  const existing = document.querySelector('.notification');
+  if (existing) existing.remove();
+
+  const el = document.createElement('div');
+  el.className = 'notification';
+  el.innerHTML = `
+    <div class="notif-icon">${icon}</div>
+    <div>
+      <div class="notif-title">${title}</div>
+      <div class="notif-msg">${msg}</div>
+    </div>`;
+  document.body.appendChild(el);
+  setTimeout(() => {
+    el.style.transition = 'opacity 0.4s';
+    el.style.opacity = '0';
+    setTimeout(() => el.remove(), 400);
+  }, 3000);
+}
+
+// ════════════════════════════════════════════
+//  UTILITIES
+// ════════════════════════════════════════════
+function formatCurrency(value) {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  const [y, m, d] = dateStr.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function updateBadge() {
+  const el = document.getElementById('athleteCountBadge');
+  if (el) el.textContent = `${state.athletes.length} atletas`;
+}
+
+// ════════════════════════════════════════════
+//  START
+// ════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', init);
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(() => console.log('PWA ativado'))
+      .catch(err => console.log('Erro SW:', err));
+  });
+}
+</script>
+</body>
+</html>
+
